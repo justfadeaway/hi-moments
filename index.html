@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f7f3" />
+    <meta name="description" content="A private, consent-first people diary for Hi." />
+    <title>Hi Moments</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="vendor/lucide.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <button class="identity-button" id="identityButton" type="button" aria-label="Open account">
+          <span class="brand-mark">hi</span>
+          <span>
+            <strong>Hi Moments</strong>
+            <small id="identityStatus">Private on this device</small>
+          </span>
+        </button>
+        <div class="header-actions">
+          <span class="privacy-badge"><i data-lucide="shield-check"></i> Local first</span>
+          <button class="icon-button" id="settingsButton" type="button" aria-label="Privacy settings" title="Privacy settings">
+            <i data-lucide="settings-2"></i>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" id="todayView" data-view="today">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow" id="todayLabel">Today</p>
+              <h1>Who crossed your path?</h1>
+            </div>
+            <span class="count-pill" id="todayCount">0 moments</span>
+          </div>
+
+          <div class="capture-grid">
+            <button class="capture-action primary" id="cameraButton" type="button">
+              <i data-lucide="camera"></i>
+              <span><strong>Take photo or video</strong><small>Open your camera</small></span>
+            </button>
+            <button class="capture-action" id="libraryButton" type="button">
+              <i data-lucide="images"></i>
+              <span><strong>Choose from library</strong><small>Photo, video, or file</small></span>
+            </button>
+            <button class="capture-action" id="noteButton" type="button">
+              <i data-lucide="audio-lines"></i>
+              <span><strong>Voice or quick note</strong><small>No media needed</small></span>
+            </button>
+          </div>
+
+          <input id="cameraInput" class="visually-hidden" type="file" accept="image/*,video/*" capture="environment" />
+          <input id="libraryInput" class="visually-hidden" type="file" accept="image/*,video/*" />
+
+          <section class="section-block">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">Today’s moments</p>
+                <h2>Private diary</h2>
+              </div>
+              <button class="text-button" id="loadDemoButton" type="button">Load demo</button>
+            </div>
+            <div class="moment-list" id="momentList"></div>
+          </section>
+        </section>
+
+        <section class="view" id="reviewView" data-view="review">
+          <div class="page-heading compact-heading">
+            <div>
+              <p class="eyebrow">On-device review</p>
+              <h1>Label people, not faces</h1>
+            </div>
+            <button class="secondary-button" id="addAppearanceButton" type="button">
+              <i data-lucide="scan-face"></i> Add person
+            </button>
+          </div>
+
+          <div class="review-layout">
+            <section class="media-workbench">
+              <div class="media-stage empty" id="mediaStage">
+                <div class="media-empty" id="mediaEmpty">
+                  <i data-lucide="image-plus"></i>
+                  <strong>No media selected</strong>
+                  <span>Capture or choose a photo/video to begin.</span>
+                </div>
+                <img id="imagePreview" alt="Selected moment" />
+                <video id="videoPreview" controls playsinline muted></video>
+                <div class="appearance-layer" id="appearanceLayer" aria-label="Detected people"></div>
+              </div>
+              <div class="workbench-status">
+                <span id="analysisStatus"><i data-lucide="lock"></i> Media stays on this device</span>
+                <button class="text-button" id="detectButton" type="button">Detect visible people</button>
+              </div>
+            </section>
+
+            <aside class="review-panel">
+              <div class="review-panel-head">
+                <div>
+                  <p class="eyebrow">Appearances</p>
+                  <h2 id="appearanceCount">0 people</h2>
+                </div>
+                <span class="local-label">Local</span>
+              </div>
+              <div class="appearance-list" id="appearanceList"></div>
+            </aside>
+          </div>
+
+          <section class="identity-editor" id="identityEditor">
+            <div class="editor-summary">
+              <span class="person-avatar" id="editorAvatar">?</span>
+              <div>
+                <p class="eyebrow">Selected person</p>
+                <h2 id="editorTitle">Choose an appearance</h2>
+                <p id="editorState">Detection is not identity.</p>
+              </div>
+            </div>
+            <div class="editor-fields">
+              <label>
+                Name you know them by
+                <input id="personNameInput" type="text" placeholder="Person A or a name" disabled />
+              </label>
+              <label>
+                Context
+                <input id="personContextInput" type="text" placeholder="Met at the founder dinner" disabled />
+              </label>
+              <label class="wide">
+                Find an existing Hi profile
+                <div class="search-row">
+                  <input id="hiSearchInput" type="search" placeholder="Type at least 2 characters" disabled />
+                  <button class="secondary-button" id="hiSearchButton" type="button" disabled>
+                    <i data-lucide="search"></i> Search Hi
+                  </button>
+                </div>
+                <small>Search is manual. This app never searches Hi using a face.</small>
+              </label>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+            <div class="editor-actions">
+              <button class="secondary-button" id="savePersonButton" type="button" disabled>Save locally</button>
+              <button class="primary-button" id="inviteButton" type="button" disabled>
+                <i data-lucide="send"></i> Invite with consent
+              </button>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="peopleView" data-view="people">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Your private network</p>
+              <h1>People</h1>
+            </div>
+            <div class="segmented" aria-label="People filter">
+              <button class="active" type="button" data-filter="all">All</button>
+              <button type="button" data-filter="follow-up">Follow up</button>
+              <button type="button" data-filter="connected">On Hi</button>
+            </div>
+          </div>
+          <div class="people-grid" id="peopleGrid"></div>
+        </section>
+
+        <section class="view" id="privacyView" data-view="privacy">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Controls</p>
+              <h1>Privacy & account</h1>
+            </div>
+          </div>
+
+          <div class="settings-layout">
+            <section class="settings-section">
+              <div class="settings-title"><i data-lucide="hard-drive"></i><div><h2>On-device storage</h2><p>Photos, videos, notes, and local people stay in this browser.</p></div></div>
+              <label class="setting-row">
+                <span><strong>Media retention</strong><small>Automatically remove old media while keeping your notes.</small></span>
+                <select id="retentionSelect">
+                  <option value="1">24 hours</option>
+                  <option value="7">7 days</option>
+                  <option value="30" selected>30 days</option>
+                  <option value="0">Keep until deleted</option>
+                </select>
+              </label>
+              <label class="setting-row">
+                <span><strong>Native face detection</strong><small>Runs locally when supported. Never identifies a person.</small></span>
+                <input id="detectionToggle" type="checkbox" checked />
+              </label>
+              <button class="danger-button" id="deleteAllButton" type="button"><i data-lucide="trash-2"></i> Delete all local data</button>
+            </section>
+
+            <section class="settings-section">
+              <div class="settings-title"><i data-lucide="cloud"></i><div><h2>Hi connection</h2><p>Optional. Sign in only when you want to search or send a consented invitation.</p></div></div>
+              <div class="account-card" id="accountCard">
+                <span class="person-avatar">L</span>
+                <div><strong>Local mode</strong><small>No Hi data is connected.</small></div>
+                <button class="secondary-button" id="connectHiButton" type="button">Connect Hi</button>
+              </div>
+              <div class="principles">
+                <p><i data-lucide="check"></i> No face search against the Hi network</p>
+                <p><i data-lucide="check"></i> No public profile before the person claims it</p>
+                <p><i data-lucide="check"></i> Contact details never appear in invitation URLs</p>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="Primary navigation">
+        <button class="active" type="button" data-nav="today"><i data-lucide="sparkles"></i><span>Today</span></button>
+        <button type="button" data-nav="review"><i data-lucide="scan-line"></i><span>Review</span></button>
+        <button type="button" data-nav="people"><i data-lucide="users"></i><span>People</span></button>
+        <button type="button" data-nav="privacy"><i data-lucide="shield"></i><span>Privacy</span></button>
+      </nav>
+    </div>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <section class="modal" id="noteModal" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle" hidden>
+        <div class="modal-head">
+          <div><p class="eyebrow">Quick capture</p><h2 id="noteModalTitle">Add a moment</h2></div>
+          <button class="icon-button modal-close" type="button" aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <label>Who did you meet?<input id="quickNamesInput" type="text" placeholder="Maya Chen, Dev Patel" /></label>
+        <label>What should you remember?<textarea id="quickNoteInput" rows="4" placeholder="Coffee at Ritual, talked about the seed round..."></textarea></label>
+        <button class="voice-button" id="dictateButton" type="button"><i data-lucide="mic"></i><span>Dictate instead</span></button>
+        <div class="modal-actions"><button class="secondary-button modal-close" type="button">Cancel</button><button class="primary-button" id="saveQuickMomentButton" type="button">Save moment</button></div>
+      </section>
+
+      <section class="modal" id="inviteModal" role="dialog" aria-modal="true" aria-labelledby="inviteModalTitle" hidden>
+        <div class="modal-head">
+          <div><p class="eyebrow">Permission gate</p><h2 id="inviteModalTitle">Invite this person</h2></div>
+          <button class="icon-button modal-close" type="button" aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <p class="modal-copy">A local person is not a Hi profile. Only send an invitation when they know you are adding them and agreed to receive it.</p>
+        <label>Email or phone<input id="inviteContactInput" type="text" placeholder="person@example.com or +1 555..." /></label>
+        <label class="consent-check"><input id="permissionCheck" type="checkbox" /><span>I confirm this person knows I am adding them to Hi and agreed to receive this invitation.</span></label>
+        <div class="modal-actions"><button class="secondary-button modal-close" type="button">Cancel</button><button class="primary-button" id="confirmInviteButton" type="button" disabled>Send invitation</button></div>
+      </section>
+
+      <section class="modal" id="connectModal" role="dialog" aria-modal="true" aria-labelledby="connectModalTitle" hidden>
+        <div class="modal-head">
+          <div><p class="eyebrow">Optional cloud layer</p><h2 id="connectModalTitle">Connect to Hi</h2></div>
+          <button class="icon-button modal-close" type="button" aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <p class="modal-copy">This prototype keeps your diary local. A production connection will use short-lived browser sessions for profile search and consented invitations.</p>
+        <div class="connect-options">
+          <button type="button"><i data-lucide="mail"></i><span><strong>Email</strong><small>One-time verification code</small></span></button>
+          <button type="button"><i data-lucide="smartphone"></i><span><strong>Phone</strong><small>One-time verification code</small></span></button>
+          <button type="button"><i data-lucide="chrome"></i><span><strong>Google</strong><small>Open secure sign-in</small></span></button>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
