@@ -3,6 +3,7 @@
 const DB_NAME = "hi-moments-v1";
 const DB_VERSION = 1;
 const stores = ["moments", "people", "settings"];
+const defaultMe = () => ({ name: "", headline: "", phone: "", email: "", x: "", website: "", linkedin: "", shareContacts: false });
 
 const state = {
   db: null,
@@ -14,6 +15,8 @@ const state = {
   peopleFilter: "all",
   mediaUrls: new Map(),
   settings: { retentionDays: 30, detectionEnabled: true },
+  me: defaultMe(),
+  pendingAfterMe: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -82,6 +85,8 @@ async function loadState() {
   const settings = await dbAll("settings");
   const saved = settings.find((item) => item.id === "privacy");
   if (saved) state.settings = { ...state.settings, ...saved.value };
+  const savedMe = settings.find((item) => item.id === "me");
+  if (savedMe) state.me = { ...defaultMe(), ...savedMe.value };
   await applyRetention();
   rebuildMediaUrls();
 }
@@ -153,6 +158,7 @@ function renderToday() {
   $("#todayLabel").textContent = new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" }).format(new Date());
   $("#todayCount").textContent = `${moments.length} moment${moments.length === 1 ? "" : "s"}`;
   const list = $("#momentList");
+  $("#meSetup").hidden = Boolean(state.me.name);
   list.innerHTML = "";
 
   if (!moments.length) {
@@ -533,9 +539,74 @@ function closeModal() {
   document.body.style.overflow = "";
 }
 
+function openMeModal() {
+  $("#meNameInput").value = state.me.name;
+  $("#meHeadlineInput").value = state.me.headline;
+  $("#mePhoneInput").value = state.me.phone;
+  $("#meEmailInput").value = state.me.email;
+  $("#meXInput").value = state.me.x ? `@${state.me.x.replace(/^@/, "")}` : "";
+  $("#meWebsiteInput").value = state.me.website;
+  $("#meLinkedinInput").value = state.me.linkedin;
+  $("#meShareCheck").checked = state.me.shareContacts;
+  openModal("meModal");
+  requestAnimationFrame(() => $("#meNameInput").focus());
+}
+
+async function saveMe() {
+  const name = $("#meNameInput").value.trim();
+  if (!name) {
+    toast("Add your name first.");
+    return;
+  }
+  state.me = {
+    name,
+    headline: $("#meHeadlineInput").value.trim(),
+    phone: $("#mePhoneInput").value.trim(),
+    email: $("#meEmailInput").value.trim(),
+    x: $("#meXInput").value.trim().replace(/^@/, ""),
+    website: $("#meWebsiteInput").value.trim(),
+    linkedin: $("#meLinkedinInput").value.trim(),
+    shareContacts: $("#meShareCheck").checked,
+  };
+  await dbPut("settings", { id: "me", value: state.me });
+  closeModal();
+  renderMe();
+  renderToday();
+  toast("Your card is ready.");
+  if (state.pendingAfterMe === "invite") {
+    state.pendingAfterMe = null;
+    await openInvite();
+  }
+}
+
+function renderMe() {
+  const me = state.me;
+  $("#identityStatus").textContent = me.name ? `${me.name} · local card` : "Set up your card";
+  $("#meSetup").hidden = Boolean(me.name);
+  $("#meCardAvatar").textContent = initials(me.name);
+  $("#meCardName").textContent = me.name || "Not set up";
+  $("#meCardSummary").textContent = me.headline || (me.name ? "Stored privately on this device." : "Add your name and optional links.");
+  $("#editMeButton").textContent = me.name ? "Edit" : "Set up";
+
+  const details = [];
+  if (me.phone) details.push(["phone", me.phone]);
+  if (me.email) details.push(["mail", me.email]);
+  if (me.x) details.push(["at-sign", `@${me.x}`]);
+  if (me.website) details.push(["globe-2", me.website]);
+  if (me.linkedin) details.push(["linkedin", me.linkedin]);
+  $("#meCardDetails").innerHTML = details.map(([icon, value]) => `<span><i data-lucide="${icon}"></i>${escapeHtml(value)}</span>`).join("");
+  refreshIcons();
+}
+
 async function openInvite() {
   const person = await saveSelectedPerson({ quiet: true });
   if (!person) return;
+  if (!state.me.name) {
+    state.pendingAfterMe = "invite";
+    openMeModal();
+    toast("Set up your card before sending an invitation.");
+    return;
+  }
   $("#inviteContactInput").value = "";
   $("#permissionCheck").checked = false;
   $("#confirmInviteButton").disabled = true;
@@ -551,7 +622,20 @@ async function confirmInvite() {
   if (!$("#permissionCheck").checked) return;
   const person = personForAppearance(selectedAppearance());
   if (!person) return;
-  const message = `${person.name}, I added a private note about meeting you. Join Hi if you would like to connect: https://hi.hirey.ai`;
+  const lines = [`Hi ${person.name}, it’s ${state.me.name}. I saved a private note about meeting you in Hi Moments.`];
+  if (state.me.headline) lines.push(state.me.headline);
+  if (state.me.shareContacts) {
+    const details = [
+      state.me.phone && `Phone: ${state.me.phone}`,
+      state.me.email && `Email: ${state.me.email}`,
+      state.me.x && `X: @${state.me.x}`,
+      state.me.website && `Web: ${state.me.website}`,
+      state.me.linkedin && `LinkedIn: ${state.me.linkedin}`,
+    ].filter(Boolean);
+    if (details.length) lines.push(details.join(" · "));
+  }
+  lines.push("If you’d like, connect with me on Hi: https://hi.hirey.ai");
+  const message = lines.join("\n");
   person.invitationState = "prepared";
   person.invitedAt = Date.now();
   person.updatedAt = Date.now();
@@ -625,6 +709,7 @@ function renderPeople() {
 function renderPrivacy() {
   $("#retentionSelect").value = String(state.settings.retentionDays);
   $("#detectionToggle").checked = state.settings.detectionEnabled;
+  renderMe();
 }
 
 async function savePrivacy() {
@@ -641,10 +726,14 @@ async function deleteAllData() {
   state.people = [];
   state.activeMomentId = null;
   state.selectedAppearanceId = null;
+  state.settings = { retentionDays: 30, detectionEnabled: true };
+  state.me = defaultMe();
+  state.pendingAfterMe = null;
   rebuildMediaUrls();
   renderToday();
   renderPeople();
   renderReview();
+  renderPrivacy();
   toast("All local data deleted.");
 }
 
@@ -674,7 +763,10 @@ function startDictation() {
 function wireEvents() {
   $$('[data-nav]').forEach((button) => button.addEventListener("click", () => switchView(button.dataset.nav)));
   $("#settingsButton").addEventListener("click", () => switchView("privacy"));
-  $("#identityButton").addEventListener("click", () => switchView("privacy"));
+  $("#identityButton").addEventListener("click", openMeModal);
+  $("#setupMeButton").addEventListener("click", openMeModal);
+  $("#editMeButton").addEventListener("click", openMeModal);
+  $("#saveMeButton").addEventListener("click", saveMe);
   $("#cameraButton").addEventListener("click", () => $("#cameraInput").click());
   $("#libraryButton").addEventListener("click", () => $("#libraryInput").click());
   $("#cameraInput").addEventListener("change", (event) => { if (event.target.files[0]) createMediaMoment(event.target.files[0]); event.target.value = ""; });
@@ -715,6 +807,7 @@ async function init() {
     renderReview();
     renderPeople();
     renderPrivacy();
+    renderMe();
     refreshIcons();
   } catch (error) {
     console.error(error);

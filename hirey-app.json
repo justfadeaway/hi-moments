@@ -1,6 +1,6 @@
 {
   "name": "Hi Moments",
-  "description": "A private, consent-first people diary for Hi. Capture photo, video, voice, or notes; review visible people on device; manually confirm Hi identities; and prepare invitations without face search.",
+  "description": "A private, consent-first people diary for Hi. Define your own local card, capture photo, video, voice, or notes, review visible people on device, confirm Hi identities, and prepare invitations without face search.",
   "homepage": "https://github.com/justfadeaway/hi-moments",
   "web": "https://justfadeaway.github.io/hi-moments/",
   "command": "python3 -m http.server 4180",

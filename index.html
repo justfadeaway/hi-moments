@@ -6,14 +6,14 @@
     <meta name="theme-color" content="#f8f9fa" />
     <meta name="description" content="A private, consent-first people diary for Hi." />
     <title>Hi Moments</title>
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <link rel="stylesheet" href="styles.css?v=5" />
     <script src="vendor/lucide.min.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
       <header class="app-header">
-        <button class="identity-button" id="identityButton" type="button" aria-label="Open account">
+        <button class="identity-button" id="identityButton" type="button" aria-label="Edit your card">
           <span class="brand-mark">hi</span>
           <span>
             <strong>Hi Moments</strong>
@@ -37,6 +37,12 @@
             </div>
             <span class="count-pill" id="todayCount">0 moments</span>
           </div>
+
+          <section class="me-setup" id="meSetup">
+            <span class="me-setup-icon"><i data-lucide="user-round"></i></span>
+            <div><strong>Start with you</strong><p>Set your name and choose what travels with invitations you send.</p></div>
+            <button class="secondary-button" id="setupMeButton" type="button">Set up my card</button>
+          </section>
 
           <div class="capture-grid">
             <button class="capture-action primary" id="cameraButton" type="button">
@@ -191,7 +197,14 @@
             </section>
 
             <section class="settings-section">
-              <div class="settings-title"><i data-lucide="cloud"></i><div><h2>Hi connection</h2><p>Optional. Sign in only when you want to search or send a consented invitation.</p></div></div>
+              <div class="settings-title"><i data-lucide="user-round"></i><div><h2>Your card</h2><p>Your local identity for invitations and introductions.</p></div></div>
+              <div class="account-card">
+                <span class="person-avatar" id="meCardAvatar">?</span>
+                <div><strong id="meCardName">Not set up</strong><small id="meCardSummary">Add your name and optional links.</small></div>
+                <button class="secondary-button" id="editMeButton" type="button">Set up</button>
+              </div>
+              <div class="me-card-details" id="meCardDetails"></div>
+              <div class="settings-subtitle"><i data-lucide="cloud"></i><div><h3>Hi connection</h3><p>Optional. Sync your public profile when you are ready.</p></div></div>
               <div class="account-card" id="accountCard">
                 <span class="person-avatar">L</span>
                 <div><strong>Local mode</strong><small>No Hi data is connected.</small></div>
@@ -238,12 +251,31 @@
         <div class="modal-actions"><button class="secondary-button modal-close" type="button">Cancel</button><button class="primary-button" id="confirmInviteButton" type="button" disabled>Send invitation</button></div>
       </section>
 
+      <section class="modal me-modal" id="meModal" role="dialog" aria-modal="true" aria-labelledby="meModalTitle" hidden>
+        <div class="modal-head">
+          <div><p class="eyebrow">Local identity</p><h2 id="meModalTitle">Your card</h2></div>
+          <button class="icon-button modal-close" type="button" aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <p class="modal-copy">This is you. It stays on this device and is shared only when you send an invitation.</p>
+        <div class="profile-form-grid">
+          <label class="wide">Name<input id="meNameInput" type="text" autocomplete="name" required placeholder="Your name" /></label>
+          <label class="wide">Headline <small>optional</small><input id="meHeadlineInput" type="text" placeholder="What should people remember?" /></label>
+          <label>Phone <small>optional</small><input id="mePhoneInput" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 415 555 0123" /></label>
+          <label>Email <small>optional</small><input id="meEmailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" /></label>
+          <label>X / Twitter <small>optional</small><input id="meXInput" type="text" placeholder="@handle" /></label>
+          <label>Website <small>optional</small><input id="meWebsiteInput" type="text" inputmode="url" placeholder="your.site" /></label>
+          <label class="wide">LinkedIn <small>optional</small><input id="meLinkedinInput" type="text" inputmode="url" placeholder="linkedin.com/in/you" /></label>
+        </div>
+        <label class="share-setting"><input id="meShareCheck" type="checkbox" /><span><strong>Share contact details</strong><small>Include the optional fields above when you send an invitation.</small></span></label>
+        <div class="modal-actions"><button class="secondary-button modal-close" type="button">Cancel</button><button class="primary-button" id="saveMeButton" type="button">Save my card</button></div>
+      </section>
+
       <section class="modal" id="connectModal" role="dialog" aria-modal="true" aria-labelledby="connectModalTitle" hidden>
         <div class="modal-head">
           <div><p class="eyebrow">Optional cloud layer</p><h2 id="connectModalTitle">Connect to Hi</h2></div>
           <button class="icon-button modal-close" type="button" aria-label="Close"><i data-lucide="x"></i></button>
         </div>
-        <p class="modal-copy">This prototype keeps your diary local. A production connection will use short-lived browser sessions for profile search and consented invitations.</p>
+        <p class="modal-copy">This prototype keeps everything local. Connecting Hi can sync the public fields from Your card and enable owner search, consent and pairings.</p>
         <div class="connect-options">
           <button type="button"><i data-lucide="mail"></i><span><strong>Email</strong><small>One-time verification code</small></span></button>
           <button type="button"><i data-lucide="smartphone"></i><span><strong>Phone</strong><small>One-time verification code</small></span></button>

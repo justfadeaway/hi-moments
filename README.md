@@ -11,6 +11,7 @@ Hi Moments is a private, consent-first people diary for Hirey Hi. It combines fa
 - Existing Hi profiles are linked only after a user searches by text and confirms the result.
 - Unknown people remain private until they explicitly claim a profile.
 - The invitation gate requires the recorder to attest that the person knows and agreed to receive it.
+- Your card defines who is sending an invitation, stays local by default, and shares optional contact details only with an explicit toggle.
 
 ## Current prototype
 
@@ -24,6 +25,7 @@ The static web prototype includes:
 - Local people diary and lifecycle states.
 - Text-based Hi profile search with manual confirmation.
 - Consent-gated invitation preparation.
+- A local sender card for name, headline, phone, email, X, website, and LinkedIn, ready for optional Hi profile sync.
 - Media retention controls and one-click local deletion.
 
 Hi authentication and the final server-issued invitation/claim token are intentionally represented as production integration boundaries. The prototype does not pretend a local link is a completed claim.
