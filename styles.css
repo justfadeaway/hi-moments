@@ -26,9 +26,11 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 14px;
   letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 button, input, textarea, select { font: inherit; letter-spacing: 0; }
-button { color: inherit; }
+button { color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
   outline: 3px solid rgba(21, 155, 98, 0.18);
   outline-offset: 2px;
@@ -295,36 +297,162 @@ button:disabled { opacity: 0.42; cursor: not-allowed; }
 }
 
 @media (max-width: 560px) {
-  .app-header { height: 58px; padding-inline: 13px; }
+  html { background: var(--surface); }
+  body { background: var(--surface); overscroll-behavior-y: none; }
+  .app-shell { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+  .app-header {
+    height: calc(56px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 14px 0;
+    background: rgba(255,255,255,.96);
+  }
+  .brand-mark { width: 30px; height: 30px; border-radius: 7px; font-size: 12px; }
+  .identity-button { gap: 9px; }
+  .identity-button strong { font-size: 14px; }
   .identity-button small { display: none; }
   .privacy-badge { display: none; }
-  main { padding: 22px 13px 48px; }
-  .page-heading { align-items: start; margin-bottom: 19px; }
-  .page-heading h1 { font-size: 29px; }
+  .icon-button { width: 42px; height: 42px; }
+  main { padding: 20px 16px 40px; }
+  .page-heading { align-items: end; gap: 12px; margin-bottom: 18px; }
+  .page-heading h1 { margin-top: 4px; font-size: 30px; line-height: 1.05; }
+  .count-pill { flex: 0 0 auto; margin-bottom: 1px; }
   .compact-heading { display: block; }
-  .compact-heading > button { margin-top: 12px; }
+  .compact-heading > button { min-height: 44px; margin-top: 13px; }
   .capture-grid { grid-template-columns: 1fr 1fr; gap: 7px; }
-  .capture-action { min-height: 78px; padding: 12px; }
-  .capture-action.primary { grid-column: 1 / -1; }
-  .capture-action svg { width: 19px; }
-  .moment-row { grid-template-columns: 52px 1fr; }
-  .moment-thumb { width: 52px; height: 50px; }
+  .capture-action {
+    min-height: 108px;
+    padding: 13px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .capture-action.primary {
+    grid-column: 1 / -1;
+    min-height: 84px;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .capture-action svg { width: 36px; height: 36px; padding: 8px; border-radius: 7px; background: var(--surface-subtle); }
+  .capture-action.primary svg { background: #292c2f; }
+  .capture-action strong { font-size: 14px; }
+  .capture-action small { font-size: 11px; line-height: 1.35; }
+  .section-block { margin-top: 30px; }
+  .section-header { margin-bottom: 10px; }
+  .text-button { min-height: 38px; padding-inline: 8px; }
+  .empty-card { min-height: 176px; padding: 24px 18px; }
+  .moment-row { grid-template-columns: 54px 1fr; min-height: 68px; padding: 6px; }
+  .moment-thumb { width: 54px; height: 54px; }
+  .moment-row strong { font-size: 13px; }
+  .moment-row small { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .moment-people { display: none; }
-  .media-stage { min-height: 300px; }
-  .workbench-status { align-items: start; gap: 6px; }
+
+  #reviewView .compact-heading { margin-bottom: 14px; }
+  .review-layout { gap: 4px; }
+  .media-workbench {
+    margin-inline: -16px;
+    border-inline: 0;
+    border-radius: 0;
+  }
+  .media-stage { min-height: 0; aspect-ratio: 4 / 3; border-radius: 0; }
+  .media-stage > img, .media-stage > video { max-height: 100%; }
+  .workbench-status { min-height: 46px; padding-inline: 16px; align-items: center; gap: 8px; }
+  .workbench-status span { max-width: 48%; line-height: 1.3; }
+  .workbench-status .text-button { min-height: 40px; padding-inline: 0; }
+  .review-panel { min-height: 0; padding: 16px 0 12px; border: 0; background: transparent; }
+  .review-panel-head { padding-bottom: 10px; }
+  .appearance-list {
+    display: flex;
+    gap: 8px;
+    margin: 10px -16px 0;
+    padding: 0 16px 5px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .appearance-list::-webkit-scrollbar { display: none; }
+  .appearance-card {
+    flex: 0 0 158px;
+    min-height: 60px;
+    padding: 8px;
+    scroll-snap-align: start;
+    border-color: var(--line);
+    background: var(--surface);
+  }
+  .appearance-card.active { border-color: #a8ddc3; }
+  .appearance-card .state-dot { align-self: start; margin-top: 5px; }
+  .identity-editor {
+    margin: 4px 0 0;
+    padding: 20px 0 10px;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+  }
+  .editor-summary { align-items: flex-start; }
+  .editor-summary .person-avatar { width: 42px; height: 42px; }
   .editor-fields, .people-grid { grid-template-columns: 1fr; }
+  .editor-fields { gap: 13px; margin-top: 18px; }
+  label { font-size: 12px; }
+  input, select { height: 46px; font-size: 16px; }
+  textarea { font-size: 16px; }
   .search-row { grid-template-columns: 1fr; }
-  .search-row button { width: 100%; }
-  .editor-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .search-row button { width: 100%; min-height: 44px; }
+  .editor-actions {
+    position: sticky;
+    bottom: calc(63px + env(safe-area-inset-bottom));
+    z-index: 6;
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    margin: 16px -8px 0;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 8px 28px rgba(18,20,22,.08);
+    backdrop-filter: blur(16px);
+  }
+  .editor-actions button { min-height: 44px; }
   .page-heading .segmented { width: 100%; margin-top: 12px; }
   #peopleView .page-heading { display: block; }
-  .segmented button { flex: 1; }
-  .setting-row { align-items: start; }
+  .segmented button { flex: 1; min-height: 38px; }
+  .people-grid { gap: 8px; }
+  .person-card { padding: 13px; }
+  .person-card .person-avatar { width: 42px; height: 42px; }
+  .settings-layout { gap: 28px; }
+  .settings-section { padding-top: 15px; }
+  .setting-row { align-items: center; gap: 12px; padding-block: 15px; }
+  .setting-row span { max-width: 67%; }
+  .setting-row select { min-width: 124px; font-size: 14px; }
   .account-card { grid-template-columns: 38px 1fr; }
-  .account-card button { grid-column: 1 / -1; width: 100%; }
-  .bottom-nav { bottom: 0; width: 100%; border-inline: 0; border-bottom: 0; border-radius: 0; box-shadow: 0 -6px 24px rgba(18,20,22,.06); }
+  .account-card button { grid-column: 1 / -1; width: 100%; min-height: 44px; }
+  .principles p { align-items: flex-start; line-height: 1.4; }
+  .bottom-nav {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 5px 8px calc(5px + env(safe-area-inset-bottom));
+    transform: none;
+    border-inline: 0;
+    border-bottom: 0;
+    border-radius: 0;
+    box-shadow: 0 -4px 18px rgba(18,20,22,.06);
+  }
+  .bottom-nav button { min-height: 54px; gap: 3px; font-size: 10px; }
+  .bottom-nav svg { width: 19px; }
   .modal-backdrop { align-items: end; padding: 0; }
-  .modal { width: 100%; max-height: 88vh; border-radius: 8px 8px 0 0; padding-bottom: calc(19px + env(safe-area-inset-bottom)); }
+  .modal {
+    position: relative;
+    width: 100%;
+    max-height: 90dvh;
+    padding: 25px 18px calc(18px + env(safe-area-inset-bottom));
+    border-inline: 0;
+    border-bottom: 0;
+    border-radius: 14px 14px 0 0;
+  }
+  .modal::before { content: ""; position: absolute; top: 8px; left: 50%; width: 36px; height: 4px; transform: translateX(-50%); border-radius: 999px; background: var(--line-strong); }
+  .modal-actions { position: sticky; bottom: 0; padding-top: 8px; background: var(--surface); }
+  .modal-actions button { min-height: 44px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
