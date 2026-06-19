@@ -348,23 +348,28 @@ button:disabled { opacity: 0.42; cursor: not-allowed; }
   .moment-people { display: none; }
 
   #reviewView .compact-heading { margin-bottom: 14px; }
-  .review-layout { gap: 4px; }
+  .review-layout { grid-template-columns: minmax(0, 1fr); gap: 4px; min-width: 0; }
   .media-workbench {
     margin-inline: -16px;
     border-inline: 0;
     border-radius: 0;
   }
-  .media-stage { min-height: 0; aspect-ratio: 4 / 3; border-radius: 0; }
-  .media-stage > img, .media-stage > video { max-height: 100%; }
+  .media-stage { min-height: 0; aspect-ratio: auto; border-radius: 0; }
+  .media-stage.empty { min-height: 286px; }
+  .media-stage.image-mode > img { height: auto; max-height: none; }
+  .media-stage.video-mode { aspect-ratio: 16 / 9; }
+  .media-stage.video-mode > video { height: 100%; max-height: 100%; }
   .workbench-status { min-height: 46px; padding-inline: 16px; align-items: center; gap: 8px; }
   .workbench-status span { max-width: 48%; line-height: 1.3; }
   .workbench-status .text-button { min-height: 40px; padding-inline: 0; }
-  .review-panel { min-height: 0; padding: 16px 0 12px; border: 0; background: transparent; }
+  .review-panel { min-width: 0; min-height: 0; padding: 16px 0 12px; overflow: hidden; border: 0; background: transparent; }
   .review-panel-head { padding-bottom: 10px; }
   .appearance-list {
     display: flex;
     gap: 8px;
     margin: 10px -16px 0;
+    width: calc(100% + 32px);
+    max-width: 100vw;
     padding: 0 16px 5px;
     overflow-x: auto;
     overscroll-behavior-x: contain;
